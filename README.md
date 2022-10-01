@@ -1,7 +1,26 @@
 # crush-ping
 A little IoT device to send and receive messages between crushes. 
 
+# Hardware
+- [Particle Photon wifi dev board](https://store.particle.io/products/photon)
+- [Adafruit nano thermal printer](https://www.adafruit.com/product/2752)
+- [5V, 2A switching power supply](https://www.adafruit.com/product/276)
+- [Female DC power adapter](https://www.adafruit.com/product/368)
+- [Metal Pushbutton with red LED ring](https://www.adafruit.com/product/559)
+- Acrylic front (TODO)
+- Project box (TODO?)
 
+# Software
+TODO add overall description
+
+## Dependencies
+- [Adafruit thermal printer library](https://github.com/adafruit/Adafruit-Thermal-Printer-Library)
+- [Particle debounce library](https://docs.particle.io/reference/device-os/libraries/d/Debounce/)
+
+
+
+
+# References
 https://docs.particle.io/getting-started/integrations/webhooks/
 
 https://docs.particle.io/reference/device-os/api/cloud-functions/particle-publish/
