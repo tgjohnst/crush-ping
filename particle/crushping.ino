@@ -28,8 +28,8 @@ void setMessage(String msg) {
 
 // This function will print whatever message is sent to it
 int receiveMessage(String msg) {
-    // For debug purposes, send an event saying we received a message
-    Particle.publish("message-received", msg, PUBLIC);
+    // debug: send an event saying we received a message
+    Particle.publish("message-received", msg);
     setMessage(msg);
     // When the function is done, return 1 so the sender knows it worked
     return 1;
@@ -38,13 +38,15 @@ int receiveMessage(String msg) {
 //Print a message 
 void printMessage(String msg) {
     // Print the message with some ascii borders (32 characters wide)
-    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOXO");
+    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
     printer.println(msg);
-    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOXO");
+    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
     // Done printing, feed it some paper to move above the tear line
-    printer.feed(2);
+    printer.feed(3);
     // Reset
     printer.setDefault();
+    // debug: send an event saying we printed a message
+    Particle.publish("message-printed", msg);
 }
 
 // If we have a message in our buffer, print it and then clear the buffer
@@ -59,7 +61,8 @@ void setup() {
     // Set up the Particle variable and function, then connect
     // to the Particle Cloud
     Particle.function("message", receiveMessage);
-    
+    Particle.variable("hasMessage", hasMessage);
+
     // Serial1 is configured to the RX and TX pins on the Photon
     Serial1.begin(9600);
     // Start communicating with the printer via the Serial1 pins
@@ -86,6 +89,8 @@ void loop() {
     }
     // if button is pressed, print the currently buffered message if we have one
     if (debouncer.rose()) { // if button is pressed
+        // debug: send an event saying button was pressed
+        Particle.publish("button-pressed", "true");
         printIfMessage();
     }
 }
