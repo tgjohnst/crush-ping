@@ -5,14 +5,26 @@
 #include <Particle.h>
 #include "Adafruit_Thermal.h"
 
-// This #include statement was automatically added by the Particle IDE.
-//#include <Adafruit_Thermal.h>
+// Define static variables
+#define LOW_DURATION 15000 // milliseconds
+#define HIGH_DURATION 100 // milliseconds
 
 // Declare global variables
 Adafruit_Thermal printer; // nano printer (9600 baud)
+
 String lastMessage;
 bool hasMessage;
+
+unsigned long duration;
+unsigned long startTime;
+unsigned long currentTime;
+
 Debounce debouncer = Debounce();
+
+int LED_PIN = D7;
+int BUTTON_PIN = D0;
+
+//-------------------------------------------------------------
 
 // Clear the internal message buffer
 void clearMessage() {
@@ -72,23 +84,38 @@ void setup() {
     lastMessage.reserve(145);
     lastMessage = "empty" ;
 
-    //Set up LEDs for button
-    pinMode(D7, OUTPUT); // set LED pin to output
-    debouncer.attach(D0, INPUT_PULLUP);
+    //Set up [button] LED
+    pinMode(LED_PIN, OUTPUT); // set LED pin to output
+    duration = LOW_DURATION;
+    startTime = millis();
+
+    //Set up button
+    debouncer.attach(BUTTON_PIN, INPUT_PULLUP);
     debouncer.interval(80); // interval in ms
 }
 
 void loop() {
+    currentTime = millis();
     // check button status
     debouncer.update();
-
+    // If we have a message, just keep the LED on
     if (hasMessage) {
-        digitalWrite(D7, HIGH);
+        digitalWrite(LED_PIN, HIGH);
+    // If we don't have a message, flash the LED every [15] seconds so we know we're alive
     } else {
-        digitalWrite(D7, LOW);
+        if (currentTime - startTime > duration) {
+            if (duration == LOW_DURATION) {
+                digitalWrite(LED_PIN, HIGH);  // change pin state
+                duration = HIGH_DURATION;  // next period is HIGH, so set correct duration
+            } else {
+                digitalWrite(LED_PIN, LOW);
+                duration = LOW_DURATION;
+            }
+            startTime = currentTime;  // pin has just changed state, so start timing again
+        }
     }
     // if button is pressed, print the currently buffered message if we have one
-    if (debouncer.rose()) { // if button is pressed
+    if (debouncer.rose()) {
         // debug: send an event saying button was pressed
         Particle.publish("button-pressed", "true");
         printIfMessage();
