@@ -36,7 +36,7 @@ The twilio function is based on [LoveNotes](https://particle.hackster.io/boldbig
 ## Function Configuration
 Add the function in [crushping.js](twilio/crushping.js) to twilio's **Functions** list. 
 
-The private assets `PARTICLE_ACCESS_TOKEN` and `PARTICLE_DEVICE_ID` must be added in **Functions -> Configure -> Environment Variables**. The access token has to be generated either through the CLI or via the web form at [this particle docs link](https://docs.particle.io/reference/cloud-apis/access-tokens/) Your device ID can be retrieved via ** Particle IDE -> Devices -> {Device Name} ** .  
+The private assets `PARTICLE_ACCESS_TOKEN` and `PARTICLE_DEVICE_ID` must be added in **Functions -> Configure -> Environment Variables**. The access token has to be generated either through the CLI or via the web form at [this particle docs link](https://docs.particle.io/reference/cloud-apis/access-tokens/) Your device ID can be retrieved via **Particle IDE -> Devices -> {Device Name}** .  
 
 Add a dependency, in addition to the defaults, `request == 2.88.0`.
 
