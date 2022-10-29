@@ -18,7 +18,7 @@ The device sits idle, blinking every 15 seconds to let the user know it's workin
 
 # Firmware logic
 ## Setup
-The firmware ([crushping.ino](particle/crushping.ino)) establishes a cloud function that acts as a message listener. The cloud function exposes a webhook thanks to Particle's magic, which is targeted by the twilio function ([crushping.py](twilio/crushping.py)). The device sets up a string buffer of 145 characters (bytes) which will store the most recently received message (sorry, no message queue in this implementation). It also establishes a debounce() object attached to the button's input pin, which smooths out electrical noise and unambiguously detects actual button presses. It sets a `hasMessage` boolean so we don't have to keep checking every loop if the contents of the message buffer are empty.
+The firmware ([crushping.ino](particle/crushping.ino)) establishes a cloud function that acts as a message listener. The cloud function exposes a webhook thanks to Particle's magic, which is targeted by the twilio function ([crushping.js](twilio/crushping.js)). The device sets up a string buffer of 145 characters (bytes) which will store the most recently received message (sorry, no message queue in this implementation). It also establishes a debounce() object attached to the button's input pin, which smooths out electrical noise and unambiguously detects actual button presses. It sets a `hasMessage` boolean so we don't have to keep checking every loop if the contents of the message buffer are empty.
 ## Runtime
 ### Message handling
 When a message is received, we truncate it to 145 characters and place it in our buffer, set `hasMessage` to `true`, then send a `message-received` event to the cloud to log successful receipt. 
@@ -30,6 +30,19 @@ If a message is in the buffer when the button is pressed, we print the message (
 - [Adafruit thermal printer library](https://github.com/adafruit/Adafruit-Thermal-Printer-Library)
 - [Particle debounce library](https://docs.particle.io/reference/device-os/libraries/d/Debounce/)
 
+# Twilio configuration
+The twilio function is based on [LoveNotes](https://particle.hackster.io/boldbigflank/love-notes-37be49) by Alex Swan. Thank you, Alex! 
+
+## Function Configuration
+Add the function in [crushping.js](twilio/crushping.js) to twilio's **Functions** list. 
+
+The private assets `PARTICLE_ACCESS_TOKEN` and `PARTICLE_DEVICE_ID` must be added in **Functions -> Configure -> Environment Variables**. The access token has to be generated either through the CLI or via the web form at [this particle docs link](https://docs.particle.io/reference/cloud-apis/access-tokens/) Your device ID can be retrieved via ** Particle IDE -> Devices -> {Device Name} ** .  
+
+Add a dependency, in addition to the defaults, `request == 2.88.0`.
+
+## Configuring function routing
+In Twilio, select your phone number (you probably configured a free one upon signup) at **Phone Numbers -> Manage -> Active Numbers -> {Number}**. Under **Messaging**, apply the `/crushping` function when a message comes in. Save and exit.
+
 # References and inspirations
 https://docs.particle.io/getting-started/integrations/webhooks/
 
@@ -40,7 +53,5 @@ https://www.hackster.io/gatoninja236/2-way-particle-photon-communication-011f02
 https://docs.particle.io/reference/device-os/api/string-class/reserve/
 
 https://github.com/thomasfredericks/Bounce2
-
-https://particle.hackster.io/boldbigflank/love-notes-37be49 (very helpful as a starting place for code logic and twilio integration)
 
 https://particle.hackster.io/middleca/sending-sound-over-the-internet-f097b4
