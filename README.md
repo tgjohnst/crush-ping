@@ -3,6 +3,8 @@ A cute little IoT device which receives and prints messages.
 
 Designed as a gift, this was a nice exercise in expanding my Arduino and twilio knowledge.
 
+![Crushping final form](images/crushping_final.jpg)
+
 ## What it does
 The device sits idle, blinking every 15 seconds to let the user know it's working, until a message comes in (via text message). Upon receipt of a message, the button lights up solid red to let the user know something is waiting. When the button is pressed, the message is printed from the thermal printer.
 
