@@ -49,14 +49,18 @@ int receiveMessage(String msg) {
 
 //Print a message 
 void printMessage(String msg) {
+    // Apparently, we must wake the printer from low power mode before interacting with it
+    printer.wake();
+    printer.setDefault();
     // Print the message with some ascii borders (32 characters wide)
     printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
     printer.println(msg);
     printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
     // Done printing, feed it some paper to move above the tear line
-    printer.feed(3);
-    // Reset
-    printer.setDefault();
+    printer.feed(2);
+    // sleep printer now that we're done with it
+    printer.sleep();
+    //delay(1000L);
     // debug: send an event saying we printed a message
     Particle.publish("message-printed", msg);
 }
@@ -74,6 +78,7 @@ void setup() {
     // to the Particle Cloud
     Particle.function("message", receiveMessage);
     Particle.variable("hasMessage", hasMessage);
+    Particle.variable("lastMessage", lastMessage);
 
     // Serial1 is configured to the RX and TX pins on the Photon
     Serial1.begin(9600);
@@ -101,7 +106,7 @@ void loop() {
     // If we have a message, just keep the LED on
     if (hasMessage) {
         digitalWrite(LED_PIN, HIGH);
-    // If we don't have a message, flash the LED every [15] seconds so we know we're alive
+    // If we don't have a message, flash the LED every [5] seconds so we know we're alive
     } else {
         if (currentTime - startTime > duration) {
             if (duration == LOW_DURATION) {

@@ -1,128 +1,54 @@
+// This was originally sourced from Alex Swan's lovenotes project at https://particle.hackster.io/boldbigflank/love-notes-37be49
+
 // This #include statement was automatically added by the Particle IDE.
-#include "Debounce.h"
+#include <Adafruit_Thermal.h>
+#include "cellular_hal.h"
 
-// Prereq for thermal library?
-#include <Particle.h>
-#include "Adafruit_Thermal.h"
+Adafruit_Thermal printer;
 
-// Define static variables
-#define LOW_DURATION 15000 // milliseconds
-#define HIGH_DURATION 100 // milliseconds
 
-// Declare global variables
-Adafruit_Thermal printer; // nano printer (9600 baud)
+// Connect to the Particle Cloud when we say so, so that we can set up
+// cloud variables and functions and only connect once
+SYSTEM_MODE(SEMI_AUTOMATIC)
 
-String lastMessage;
-bool hasMessage;
+// Soracom.io Credentials
+STARTUP(cellular_credentials_set("soracom.io", "sora", "sora", NULL));
 
-unsigned long duration;
-unsigned long startTime;
-unsigned long currentTime;
 
-Debounce debouncer = Debounce();
-
-int LED_PIN = D7;
-int BUTTON_PIN = D0;
-
-//-------------------------------------------------------------
-
-// Clear the internal message buffer
-void clearMessage() {
-    lastMessage = "";
-    hasMessage = false;
-}
-
-void setMessage(String msg) {
-    // Write message (truncated for buffer size) to internal buffer
-    lastMessage = msg.substring(0,144);
-    hasMessage = true;
-}
+// This variable is for double checking the device is communicating
+bool ready = false;
 
 // This function will print whatever message is sent to it
 int receiveMessage(String msg) {
-    // debug: send an event saying we received a message
-    Particle.publish("message-received", msg);
-    setMessage(msg);
-    // When the function is done, return 1 so the sender knows it worked
-    return 1;
-}
-
-//Print a message 
-void printMessage(String msg) {
-    // Apparently, we must wake the printer from low power mode before interacting with it
-    printer.wake();
-    printer.setDefault();
+    // For debug purposes, send an event saying we received a message
+    Particle.publish("message-received", msg, PUBLIC);
     // Print the message with some ascii borders (32 characters wide)
-    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
+    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOXO");
     printer.println(msg);
-    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
+    printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOXO");
     // Done printing, feed it some paper to move above the tear line
     printer.feed(2);
-    // sleep printer now that we're done with it
-    printer.sleep();
-    //delay(1000L);
-    // debug: send an event saying we printed a message
-    Particle.publish("message-printed", msg);
-}
-
-// If we have a message in our buffer, print it and then clear the buffer
-void printIfMessage() {
-    if (hasMessage) {
-        printMessage(lastMessage);
-        clearMessage();
-    }
+    // Reset
+    printer.setDefault();
+    // When the function is done, return 1 so the sender knows it worked
+    return 1;
 }
 
 void setup() {
     // Set up the Particle variable and function, then connect
     // to the Particle Cloud
+    Particle.variable("ready", ready);
     Particle.function("message", receiveMessage);
-    Particle.variable("hasMessage", hasMessage);
-    Particle.variable("lastMessage", lastMessage);
-
-    // Serial1 is configured to the RX and TX pins on the Photon
-    Serial1.begin(9600);
+    Particle.connect();
+    
+    // Serial1 is configured to the RX and TX pins on the Electron
+    Serial1.begin(19200);
     // Start communicating with the printer via the Serial1 pins
     printer.begin(&Serial1);
     
-    // Preallocate up to 145 characters (bytes) for lastMessage
-    lastMessage.reserve(145);
-    lastMessage = "empty" ;
-
-    //Set up [button] LED
-    pinMode(LED_PIN, OUTPUT); // set LED pin to output
-    duration = LOW_DURATION;
-    startTime = millis();
-
-    //Set up button
-    debouncer.attach(BUTTON_PIN, INPUT_PULLUP);
-    debouncer.interval(80); // interval in ms
+    ready = true;
 }
 
 void loop() {
-    currentTime = millis();
-    // check button status
-    debouncer.update();
-    // If we have a message, just keep the LED on
-    if (hasMessage) {
-        digitalWrite(LED_PIN, HIGH);
-    // If we don't have a message, flash the LED every [5] seconds so we know we're alive
-    } else {
-        if (currentTime - startTime > duration) {
-            if (duration == LOW_DURATION) {
-                digitalWrite(LED_PIN, HIGH);  // change pin state
-                duration = HIGH_DURATION;  // next period is HIGH, so set correct duration
-            } else {
-                digitalWrite(LED_PIN, LOW);
-                duration = LOW_DURATION;
-            }
-            startTime = currentTime;  // pin has just changed state, so start timing again
-        }
-    }
-    // if button is pressed, print the currently buffered message if we have one
-    if (debouncer.rose()) {
-        // debug: send an event saying button was pressed
-        Particle.publish("button-pressed", "true");
-        printIfMessage();
-    }
+    // Unused in this implementation
 }
