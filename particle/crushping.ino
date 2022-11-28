@@ -7,7 +7,7 @@
 
 // Define static variables
 #define LOW_DURATION 15000 // milliseconds
-#define HIGH_DURATION 100 // milliseconds
+#define HIGH_DURATION 250 // milliseconds
 
 // Declare global variables
 Adafruit_Thermal printer; // nano printer (9600 baud)
