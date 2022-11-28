@@ -8,9 +8,10 @@
 // Define static variables
 #define LOW_DURATION 15000 // milliseconds
 #define HIGH_DURATION 250 // milliseconds
+#define PRINTER_RATE 9600 // hertz/baud, Adafruit nano printer
 
 // Declare global variables
-Adafruit_Thermal printer; // nano printer (9600 baud)
+Adafruit_Thermal printer;
 
 String lastMessage;
 bool hasMessage;
@@ -58,7 +59,7 @@ void printMessage(String msg) {
     printer.println("XOXOXOXOXOXOXOXOXOXOXOXOXOXOXOX");
     // Done printing, feed it some paper to move above the tear line
     printer.feed(2);
-    // sleep printer now that we're done with it
+    // Put printer in low power mode between prints (this happens automatically after certain time)
     printer.sleep();
     //delay(1000L);
     // debug: send an event saying we printed a message
@@ -74,20 +75,19 @@ void printIfMessage() {
 }
 
 void setup() {
-    // Set up the Particle variable and function, then connect
-    // to the Particle Cloud
+    // Expose Particle cloud variables and functions
     Particle.function("message", receiveMessage);
     Particle.variable("hasMessage", hasMessage);
     Particle.variable("lastMessage", lastMessage);
 
     // Serial1 is configured to the RX and TX pins on the Photon
-    Serial1.begin(9600);
+    Serial1.begin(PRINTER_RATE);
     // Start communicating with the printer via the Serial1 pins
     printer.begin(&Serial1);
     
     // Preallocate up to 145 characters (bytes) for lastMessage
     lastMessage.reserve(145);
-    lastMessage = "empty" ;
+    lastMessage = "empty";
 
     //Set up [button] LED
     pinMode(LED_PIN, OUTPUT); // set LED pin to output
@@ -96,7 +96,7 @@ void setup() {
 
     //Set up button
     debouncer.attach(BUTTON_PIN, INPUT_PULLUP);
-    debouncer.interval(80); // interval in ms
+    debouncer.interval(80); // minimum push interval in ms
 }
 
 void loop() {
@@ -110,7 +110,7 @@ void loop() {
     } else {
         if (currentTime - startTime > duration) {
             if (duration == LOW_DURATION) {
-                digitalWrite(LED_PIN, HIGH);  // change pin state
+                digitalWrite(LED_PIN, HIGH);
                 duration = HIGH_DURATION;  // next period is HIGH, so set correct duration
             } else {
                 digitalWrite(LED_PIN, LOW);
@@ -121,8 +121,7 @@ void loop() {
     }
     // if button is pressed, print the currently buffered message if we have one
     if (debouncer.rose()) {
-        // debug: send an event saying button was pressed
-        Particle.publish("button-pressed", "true");
+        Particle.publish("button-pressed", "true"); // debug: send an event saying button was pressed
         printIfMessage();
     }
 }
