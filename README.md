@@ -1,7 +1,7 @@
 # crush-ping
 A cute little IoT device which receives and prints messages.
 
-Designed as a gift, this was a nice exercise in expanding my Arduino and twilio knowledge.
+Designed as a gift, this was a nice exercise in expanding my Arduino and Twilio knowledge.
 
 ![Crushping final form](images/crushping_final.jpg)
 
@@ -36,14 +36,21 @@ If a message is in the buffer when the button is pressed, we print the message (
 The twilio function is based on [LoveNotes](https://particle.hackster.io/boldbigflank/love-notes-37be49) by Alex Swan. Thank you, Alex! 
 
 ## Function Configuration
-Add the function in [crushping.js](twilio/crushping.js) to twilio's **Functions** list. 
+### Updated
+Create a service called `crushping`.
+
+Add the function in [crushping.js](twilio/crushping.js) to twilio's **Functions** list and save it.
 
 The private assets `PARTICLE_ACCESS_TOKEN` and `PARTICLE_DEVICE_ID` must be added in **Functions -> Configure -> Environment Variables**. The access token has to be generated either through the CLI or via the web form at [this particle docs link](https://docs.particle.io/reference/cloud-apis/access-tokens/) Your device ID can be retrieved via **Particle IDE -> Devices -> {Device Name}** .  
 
-Add a dependency, in addition to the defaults, `request == 2.88.0`.
+Add a dependency, in addition to the defaults, `request == 2.88.0`. Others may also be automatically applied, including `xmldom==0.1.27` and `lodash==4.17.11`.
+
+Click `Deploy All` in the service console.
 
 ## Configuring function routing
-In Twilio, select your phone number (you probably configured a free one upon signup) at **Phone Numbers -> Manage -> Active Numbers -> {Number}**. Under **Messaging**, apply the `/crushping` function when a message comes in. Save and exit.
+In Twilio, select your phone number (you probably configured a free one upon signup) at **Phone Numbers -> Manage -> Active Numbers -> {Number}**. Under **Messaging**, select your `crushping` service, select `Function` and apply the `/crushping` function when a message comes in. Save and exit.
+
+![image](https://user-images.githubusercontent.com/5710633/234214459-96253301-4812-435b-ad4c-84aead2895b9.png)
 
 # References and inspirations
 https://docs.particle.io/getting-started/integrations/webhooks/
